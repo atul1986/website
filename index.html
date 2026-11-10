@@ -1179,14 +1179,19 @@ $('#copyMail').onclick=()=>{ const t=CONFIG.email; (navigator.clipboard?navigato
 $('#cform').onsubmit=async e=>{ e.preventDefault();
   const name=$('#cn').value.trim(), from=$('#ce').value.trim(), reason=$('#cs').value, msg=$('#cm').value.trim();
   const st=$('#formStatus'), btn=$('#sendBtn'); st.className='form-status'; st.textContent='Sending…'; btn.disabled=true;
-  const mailtoFallback=()=>{ st.className='form-status err'; st.innerHTML=`The message couldn't be sent from here. Please email it to <b>${esc(CONFIG.email)}</b> — your text is copied.`; try{navigator.clipboard.writeText(msg)}catch(e){}
-    location.href=`mailto:${CONFIG.email}?subject=${encodeURIComponent(reason+' — '+name)}&body=${encodeURIComponent(msg+'\n\n— '+name+' ('+from+')')}`; };
+  const mailtoFallback=()=>{ const href=`mailto:${CONFIG.email}?subject=${encodeURIComponent(reason+' — '+name)}&body=${encodeURIComponent(msg+'\n\n— '+name+' ('+from+')')}`;
+    try{navigator.clipboard.writeText(msg)}catch(e){}
+    st.className='form-status err'; st.innerHTML=`The message couldn't be delivered automatically. Please send it by email to <b style="user-select:all">${esc(CONFIG.email)}</b> — your text is copied. <a href="${href}">Open my email app</a>`; };
   try{
-    const r=await fetch('https://formsubmit.co/ajax/'+CONFIG.email,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({name,email:from,_replyto:from,reason,message:msg,_subject:`Website message: ${reason} — ${name}`,_template:'table',_captcha:'false',page:location.href})});
+    // FormData keeps this a "simple" request (no CORS preflight); give up after 20 s
+    const fd=new FormData(); Object.entries({name,email:from,_replyto:from,reason,message:msg,_subject:`Website message: ${reason} — ${name}`,_template:'table',_captcha:'false',page:location.href}).forEach(([k,v])=>fd.append(k,v));
+    const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),20000);
+    const slow=setTimeout(()=>{ st.textContent='Still sending — this can take a few seconds…'; },5000);
+    const r=await fetch('https://formsubmit.co/ajax/'+CONFIG.email,{method:'POST',headers:{'Accept':'application/json'},body:fd,signal:ctrl.signal});
+    clearTimeout(timer); clearTimeout(slow);
     const j=await r.json().catch(()=>({}));
     if(r.ok && String(j.success)==='true'){ st.className='form-status ok'; st.textContent=`Thank you, ${name.split(' ')[0]}. Your message was sent — Dr. Kathole will reply to ${from}.`; $('#cform').reset(); toast('Message sent'); }
-    else mailtoFallback();
+    else mailtoFallback(j.message);
   }catch(err){ mailtoFallback(); }
   btn.disabled=false;
 };

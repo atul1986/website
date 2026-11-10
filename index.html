@@ -814,6 +814,7 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
 /* ============ CONFIG — edit these ============ */
 const CONFIG = {
   email: "atul.kathole1910@gmail.com",   // contact form, project enquiries and contact card use this
+  web3formsKey: "",   // ← paste your free Web3Forms access key here (web3forms.com). When set, the contact form uses Web3Forms instead of FormSubmit
   counterNamespace: "atul-sir-onrender", // visitor counter namespace (keep it unique)
   siteUrl: "https://atul1986.github.io/website/",
   // Backend for visitor database, AI chatbot and Google sync. Leave "" when the site runs on its own server (Render).
@@ -1182,6 +1183,17 @@ $('#cform').onsubmit=async e=>{ e.preventDefault();
   const mailtoFallback=()=>{ const href=`mailto:${CONFIG.email}?subject=${encodeURIComponent(reason+' — '+name)}&body=${encodeURIComponent(msg+'\n\n— '+name+' ('+from+')')}`;
     try{navigator.clipboard.writeText(msg)}catch(e){}
     st.className='form-status err'; st.innerHTML=`The message couldn't be delivered automatically. Please send it by email to <b style="user-select:all">${esc(CONFIG.email)}</b> — your text is copied. <a href="${href}">Open my email app</a>`; };
+  if(CONFIG.web3formsKey){
+    try{
+      const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),20000);
+      const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},signal:ctrl.signal,
+        body:JSON.stringify({access_key:CONFIG.web3formsKey,subject:`Website message: ${reason} — ${name}`,from_name:'Dr. Atul Kathole website',name,email:from,replyto:from,reason,message:msg,page:location.href,botcheck:''})});
+      clearTimeout(timer); const j=await r.json().catch(()=>({}));
+      if(r.ok && j.success){ st.className='form-status ok'; st.textContent=`Thank you, ${name.split(' ')[0]}. Your message was sent — Dr. Kathole will reply to ${from}.`; $('#cform').reset(); toast('Message sent'); }
+      else { console.warn('Web3Forms',r.status,j); mailtoFallback(); }
+    }catch(err){ console.warn('Web3Forms request failed',err); mailtoFallback(); }
+    btn.disabled=false; return;
+  }
   try{
     // FormData keeps this a "simple" request (no CORS preflight); give up after 20 s
     const fd=new FormData(); Object.entries({name,email:from,_replyto:from,reason,message:msg,_subject:`Website message: ${reason} — ${name}`,_template:'table',_captcha:'false',page:location.href}).forEach(([k,v])=>fd.append(k,v));

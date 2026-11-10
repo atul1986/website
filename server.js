@@ -1,6 +1,6 @@
 /*
  * atul-sir.onrender.com — website server
- * - Serves the site from /public
+ * - Serves the site (index.html, admin.html, gallery/ and other page files in this folder)
  * - Records every visit (approx. location, device, browser, page, referrer, time on page)
  * - Powers the chatbot (uses Claude if ANTHROPIC_API_KEY is set; otherwise the page's built-in assistant answers)
  * - Private admin dashboard at /admin (protected by ADMIN_KEY)
@@ -33,6 +33,12 @@ app.set('trust proxy', true);
 app.disable('x-powered-by');
 app.use(express.json({ limit: '20kb' }));
 app.use(express.text({ limit: '5kb', type: 'text/plain' }));
+app.use('/api', (req, res, next) => {
+  if (req.path.startsWith('/admin')) return next();
+  res.set({ 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Access-Control-Allow-Headers': 'content-type' });
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  next();
+});
 
 /* ---------------------------------------------------------------- storage */
 function makeFileStore() {
@@ -384,11 +390,17 @@ app.get('/api/admin/export.csv', admin, async (req, res) => {
 });
 
 /* ---------------------------------------------------------------- pages */
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 // Old page links from the previous site now jump to the matching section
 const OLD = { bio: 'about', experience: 'about', 'portfolio-handled': 'leadership', contact: 'contact', patents: 'patents', copyrights: 'patents', publications: 'publications', expertsession: 'leadership', 'research-grant': 'leadership', achievements: 'gallery' };
 app.get('/:old', (req, res, next) => OLD[req.params.old] ? res.redirect(301, '/#' + OLD[req.params.old]) : next());
-app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'], maxAge: '1h' }));
-app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'public', 'index.html')));
+// Only page files are public — never server.js, data/ or config files
+app.use('/gallery', express.static(path.join(__dirname, 'gallery'), { maxAge: '1d' }));
+app.get(/^\/[\w-]+\.(html|jpe?g|png|webp|svg|ico|pdf)$/i, (req, res, next) => {
+  const f = path.join(__dirname, path.basename(req.path));
+  fs.existsSync(f) ? res.sendFile(f, { maxAge: 3600000 }) : next();
+});
+app.get(['/', '/index.html'], (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'index.html')));
 
 app.listen(PORT, () => console.log(`Site running on http://localhost:${PORT}`));

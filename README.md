@@ -1,4 +1,8 @@
-# atul-sir.onrender.com — website v2
+# Dr. Atul B. Kathole — academic website
+
+**Live site (GitHub Pages):** https://atul1986.github.io/website/
+
+The page works on GitHub Pages as it is. The extra features — visitor database, `/admin` dashboard, AI chatbot and daily Google/Scholar sync — need the small server in `server.js`, which runs free on Render (steps below). After Render is running, put its address in `CONFIG.apiBase` in `index.html` and the GitHub Pages site will use it too.
 
 Your academic website, now with a visitor database, a chatbot, a private visitor dashboard and research figures that update themselves every day.
 
@@ -7,13 +11,13 @@ Your academic website, now with a visitor database, a chatbot, a private visitor
 | File | What it is |
 |---|---|
 | `server.js` | The website server (Node.js). Records visits, runs the chatbot, updates Scholar data, serves `/admin`. |
-| `public/index.html` | The website itself. |
-| `public/admin.html` | Your private visitor dashboard at `/admin`. |
-| `public/gallery/` | Achievement images (certificate, Elsevier reviewer rewards). Add more here. |
+| `index.html` | The website itself. |
+| `admin.html` | Your private visitor dashboard at `/admin`. |
+| `gallery/` | Achievement images (certificate, Elsevier reviewer rewards). Add more here. |
 | `announcements.json` | The "Upcoming" news bar. Edit, commit, done. |
 | `chatbot-knowledge.md` | What the chatbot knows about you. Edit to teach it new facts. |
 
-**Before you deploy, copy these from your current site into `public/`:** `atulsir-bio.jpeg` (your photo), `books.html` and `hpc.html`.
+**Before you deploy, upload these into the main folder:** `atulsir-bio.jpeg` (your photo), `books.html` and `hpc.html`.
 
 ## Deploy on Render (about 10 minutes)
 
@@ -51,7 +55,7 @@ Your academic website, now with a visitor database, a chatbot, a private visitor
 ## Everyday edits
 
 - **News bar:** edit `announcements.json`.
-- **New achievement:** add the image to `public/gallery/`, then copy one `<figure class="g-card"…>` block in the Recognition section of `index.html`.
+- **New achievement:** add the image to `gallery/`, then copy one `<figure class="g-card"…>` block in the Recognition section of `index.html`.
 - **Your email:** set `CONFIG.email` near the top of the script in `index.html` (contact form, project enquiries and contact card use it).
 - **Chatbot facts:** edit `chatbot-knowledge.md` (AI mode) and the `INTENTS` list in `index.html` (built-in mode).
 

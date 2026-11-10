@@ -445,7 +445,7 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
   </div>
 </section>
 
-<!-- RECOGNITION WALL — to add an achievement, put the image in public/gallery/ and copy a <figure> block -->
+<!-- RECOGNITION WALL — to add an achievement, put the image in gallery/ and copy a <figure> block -->
 <section id="gallery" style="padding-top:36px">
   <div class="wrap">
     <h2>Recognition</h2>
@@ -769,7 +769,10 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
 const CONFIG = {
   email: "",                       // ← put your email here, e.g. "atul.kathole@adypu.edu.in" (contact form + vCard use it)
   counterNamespace: "atul-sir-onrender", // visitor counter namespace (keep it unique)
-  siteUrl: "https://atul-sir.onrender.com/",
+  siteUrl: "https://atul1986.github.io/website/",
+  // Backend for visitor database, AI chatbot and Google sync. Leave "" when the site runs on its own server (Render).
+  // On GitHub Pages, put your Render address here once it's running, e.g. "https://atul-sir-site.onrender.com"
+  apiBase: "",
   instagramPosts: ["https://www.instagram.com/p/Ddk9LL0oFxV/"], // shown in "In the news"; add more post links here
   nameVariants: ["Atul Kathole","Dr. Atul Kathole","Dr. Atul B. Kathole","Dr. Atul Baliram Kathole"]
 };
@@ -941,7 +944,8 @@ const countUp=(el,to,suffix='')=>{ if(reduced){el.textContent=fmt(to)+suffix;ret
 new IntersectionObserver((es,o)=>es.forEach(e=>{ if(e.isIntersecting){ e.target.querySelectorAll('[data-count]').forEach(b=>countUp(b,+b.dataset.count,b.dataset.suffix||'')); o.disconnect(); }}),{threshold:.4}).observe($('.telemetry'));
 
 /* ============ VISITORS (own server first, free counter as backup) ============ */
-const onServer = location.protocol.startsWith('http');
+const API = CONFIG.apiBase ? CONFIG.apiBase.replace(/\/$/,'') : '';
+const onServer = location.protocol.startsWith('http') && (!!API || !/github\.io$/.test(location.hostname));
 let VID=''; try{ VID=localStorage.getItem('vid')||''; if(!VID){ VID=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)); localStorage.setItem('vid',VID); } }catch(e){}
 async function counterBackup(key, increment){
   const ns=CONFIG.counterNamespace;
@@ -957,7 +961,7 @@ function trackLeave(visitId){
   addEventListener('scroll',()=>{ const h=document.documentElement; maxScroll=Math.max(maxScroll,Math.round((h.scrollTop+innerHeight)/h.scrollHeight*100)); },{passive:true});
   const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) seen.add(e.target.id); }),{threshold:.35});
   document.querySelectorAll('section[id]').forEach(sec=>io.observe(sec));
-  const send=()=>{ try{ navigator.sendBeacon('/api/visit/'+visitId+'/leave', new Blob([JSON.stringify({duration:(Date.now()-t0)/1000,scrolled:maxScroll,sections:[...seen].join(',')})],{type:'text/plain'})); }catch(e){} };
+  const send=()=>{ try{ navigator.sendBeacon(API+'/api/visit/'+visitId+'/leave', new Blob([JSON.stringify({duration:(Date.now()-t0)/1000,scrolled:maxScroll,sections:[...seen].join(',')})],{type:'text/plain'})); }catch(e){} };
   addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') send(); });
   addEventListener('pagehide',send);
 }
@@ -968,10 +972,10 @@ async function loadVisitors(){
     try{
       let s;
       if(first){
-        const r=await fetch('/api/visit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:VID,page:location.pathname+location.hash,ref:document.referrer,lang:navigator.language,tz:Intl.DateTimeFormat().resolvedOptions().timeZone,screen:screen.width+'x'+screen.height,returning})});
+        const r=await fetch(API+'/api/visit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({vid:VID,page:location.pathname+location.hash,ref:document.referrer,lang:navigator.language,tz:Intl.DateTimeFormat().resolvedOptions().timeZone,screen:screen.width+'x'+screen.height,returning})});
         if(!r.ok) throw 0; s=await r.json(); try{sessionStorage.setItem('counted',s.visitId)}catch(e){}
         trackLeave(s.visitId);
-      } else { const r=await fetch('/api/stats'); if(!r.ok) throw 0; s=await r.json(); }
+      } else { const r=await fetch(API+'/api/stats'); if(!r.ok) throw 0; s=await r.json(); }
       return {total:s.total,day:s.today,unique:s.unique,online:s.online};
     }catch(e){}
   }
@@ -1220,7 +1224,7 @@ function applyScholar(d){
   const when=d.updated?new Date(d.updated).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
   $('#srcNote').textContent=`${exact?'Google Scholar':'Google Scholar (Nov 2026), new papers via '+d.source}. Last automatic update ${when}.`;
 }
-if(onServer) fetch('/api/scholar').then(r=>r.ok?r.json():null).then(d=>{ if(d&&d.source) applyScholar(d); }).catch(()=>{});
+if(onServer) fetch(API+'/api/scholar').then(r=>r.ok?r.json():null).then(d=>{ if(d&&d.source) applyScholar(d); }).catch(()=>{});
 
 /* ============ UPCOMING BAR ============ */
 const NEWS_DEFAULT=[
@@ -1239,7 +1243,7 @@ function renderNews(items){
   if(hidden){ $('#ticker').remove(); return; }
   $('#tkClose').onclick=()=>{ $('#ticker').remove(); try{sessionStorage.setItem('tkHidden','1')}catch(e){} };
   renderNews(NEWS_DEFAULT);
-  if(onServer) fetch('/api/announcements').then(r=>r.ok?r.json():null).then(j=>{ if(Array.isArray(j)&&j.length&&document.getElementById('tkMove')) renderNews(j); }).catch(()=>{});
+  if(onServer) fetch(API+'/api/announcements').then(r=>r.ok?r.json():null).then(j=>{ if(Array.isArray(j)&&j.length&&document.getElementById('tkMove')) renderNews(j); }).catch(()=>{});
 })();
 
 /* ============ RECOGNITION LIGHTBOX ============ */
@@ -1317,7 +1321,7 @@ const TIPS=[
     const typing=add('bot','<span class="typing"><i></i><i></i><i></i></span>');
     const local=localAnswer(q); let reply=null; const t0=Date.now();
     if(onServer){ try{ const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),15000);
-      const r=await fetch('/api/chat',{method:'POST',signal:ctrl.signal,headers:{'content-type':'application/json'},body:JSON.stringify({message:q,history,vid:VID,localAnswer:strip(local)})});
+      const r=await fetch(API+'/api/chat',{method:'POST',signal:ctrl.signal,headers:{'content-type':'application/json'},body:JSON.stringify({message:q,history,vid:VID,localAnswer:strip(local)})});
       clearTimeout(to); if(r.ok){ const j=await r.json(); reply=j.reply; } }catch(e){} }
     const wait=Math.max(0,550-(Date.now()-t0)); await new Promise(r=>setTimeout(r,wait));
     typing.innerHTML = reply ? linkify(reply) : local;
@@ -1389,7 +1393,7 @@ function applyWeb(d){
   if(added) renderPubs();
   if(d.updated) $('#syncNote').textContent=`Synced from Google Books, Google News and Crossref on ${new Date(d.updated).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}, searching ${ (d.names||CONFIG.nameVariants).length } spellings of my name.`;
 }
-if(onServer) fetch('/api/web').then(r=>r.ok?r.json():null).then(d=>{ if(d) applyWeb(d); }).catch(()=>{});
+if(onServer) fetch(API+'/api/web').then(r=>r.ok?r.json():null).then(d=>{ if(d) applyWeb(d); }).catch(()=>{});
 </script>
 </body>
 </html>

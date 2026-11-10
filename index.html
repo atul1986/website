@@ -1191,8 +1191,9 @@ $('#cform').onsubmit=async e=>{ e.preventDefault();
     clearTimeout(timer); clearTimeout(slow);
     const j=await r.json().catch(()=>({}));
     if(r.ok && String(j.success)==='true'){ st.className='form-status ok'; st.textContent=`Thank you, ${name.split(' ')[0]}. Your message was sent — Dr. Kathole will reply to ${from}.`; $('#cform').reset(); toast('Message sent'); }
-    else mailtoFallback(j.message);
-  }catch(err){ mailtoFallback(); }
+    else if(/activat/i.test(j.message||'')){ st.className='form-status err'; st.innerHTML=`The contact form is being switched on — the site owner must confirm it once. Meanwhile please email <b style="user-select:all">${esc(CONFIG.email)}</b>.`; console.info('FormSubmit:',j.message); }
+    else { console.warn('FormSubmit response',r.status,j); mailtoFallback(); }
+  }catch(err){ console.warn('FormSubmit request failed',err); mailtoFallback(); }
   btn.disabled=false;
 };
 function pageUrl(){ return location.protocol.startsWith('http') ? location.origin+location.pathname : CONFIG.siteUrl; }

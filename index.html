@@ -393,6 +393,19 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
 .mail-line code{font:500 .92rem var(--body);user-select:all;color:var(--muted)}
 .mail-line button{font:600 .8rem var(--body);padding:.3rem .7rem;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 
+/* intro video */
+.film{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:36px;align-items:center}
+.film-box{position:relative;border-radius:var(--r-lg);overflow:hidden;background:#0B1222;box-shadow:0 30px 60px -25px rgba(10,16,30,.55);aspect-ratio:16/9}
+.film-box video{width:100%;height:100%;display:block;object-fit:cover}
+.film-play{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(0deg,rgba(11,18,34,.55),rgba(11,18,34,.05));border:0;cursor:pointer;color:#fff}
+.film-play span{display:flex;align-items:center;gap:12px;padding:.85rem 1.3rem .85rem .85rem;border-radius:999px;background:rgba(11,18,34,.75);font:600 1rem var(--body);backdrop-filter:blur(6px)}
+.film-play i{width:44px;height:44px;border-radius:50%;background:var(--pulse);display:grid;place-items:center;font-style:normal;color:#06231f;font-size:1.1rem}
+.film-play[hidden]{display:none}
+.film ul{list-style:none;margin-top:1rem;color:var(--muted);font-size:.95rem}
+.film li{padding:.45rem 0;border-bottom:1px solid var(--line);display:flex;gap:.8rem}
+.film li time{color:var(--signal);font-weight:600;min-width:3rem;font-variant-numeric:tabular-nums;cursor:pointer}
+@media (max-width:860px){.film{grid-template-columns:1fr}}
+
 /* terminal */
 .term{position:fixed;inset:0;z-index:100;background:rgba(8,12,22,.55);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;padding:9vh 16px 16px}
 .term.open{display:flex}
@@ -455,6 +468,7 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
         <div class="ctas">
           <a class="btn" href="#publications">Explore my research</a>
           <a class="btn ghost" href="#collaborate">Find a project with me</a>
+          <a class="btn ghost" href="#intro-video" id="watchBtn">▶ Watch 1-min intro</a>
         </div>
         <div class="ids" aria-label="Research profiles">
           <a class="idc" href="https://scholar.google.com/citations?hl=en&amp;user=5kZO4MoAAAAJ&amp;view_op=list_works&amp;sortby=pubdate" target="_blank" rel="noopener"><i style="background:#4285F4">GS</i><div><b>Google Scholar</b><span id="idCites">1,277 citations · h-index 21</span></div></a>
@@ -476,6 +490,28 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
       <div><b>#33</b><span>World rank, Top1000</span></div>
       <div><b data-count="16" data-suffix="+ yrs">16+ yrs</b><span>Open Scopus access</span></div>
       <div class="live"><b id="visTop">—</b><span><i class="live-dot"></i>Visitors so far</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INTRO VIDEO -->
+<section id="intro-video" style="padding-top:32px">
+  <div class="wrap film">
+    <div class="film-box">
+      <video id="introVid" src="media/intro.mp4" poster="media/intro-poster.jpg" preload="metadata" playsinline></video>
+      <button class="film-play" id="filmPlay" aria-label="Play the one-minute introduction"><span><i>▶</i>Play the 1-minute introduction</span></button>
+    </div>
+    <div>
+      <h2>Meet me in one minute</h2>
+      <p class="lede">A narrated tour of my work and this website — with captions, so it works on mute too.</p>
+      <ul id="chapters">
+        <li><time data-t="0">0:00</time>Sense. Learn. Secure.</li>
+        <li><time data-t="6">0:06</time>Who I am</li>
+        <li><time data-t="16">0:16</time>Impact in numbers</li>
+        <li><time data-t="25">0:25</time>World Rank #33 &amp; Scopus reviewing</li>
+        <li><time data-t="37">0:37</time>A tour of this website</li>
+        <li><time data-t="47">0:47</time>For students</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -1635,6 +1671,16 @@ if(onServer) fetch(API+'/api/web').then(r=>r.ok?r.json():null).then(d=>{ if(d) a
   legend(); draw();
   let t; addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(draw,150); });
   new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+
+/* ============ INTRO VIDEO ============ */
+(function(){
+  const v=$('#introVid'), btn=$('#filmPlay');
+  const play=t=>{ if(t!=null) v.currentTime=t; v.play().catch(()=>{}); btn.hidden=true; };
+  btn.onclick=()=>play();
+  v.addEventListener("play",()=>{ btn.hidden=true; v.controls=true; }); v.addEventListener('ended',()=>{ btn.hidden=false; });
+  $('#chapters').querySelectorAll('time').forEach(el=>el.onclick=()=>play(+el.dataset.t));
+  $('#watchBtn').onclick=e=>{ e.preventDefault(); $('#intro-video').scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'}); setTimeout(()=>play(0),reduced?0:500); };
 })();
 </script>
 </body>

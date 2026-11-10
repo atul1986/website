@@ -363,6 +363,36 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
 @media (max-width:860px){.news-grid{grid-template-columns:1fr}}
 @media (max-width:480px){.news-list li{grid-template-columns:1fr;gap:2px}}
 
+/* research IDs */
+.ids{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.idc{display:flex;align-items:center;gap:10px;padding:.45rem .9rem .45rem .45rem;border-radius:14px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:.86rem;line-height:1.25;transition:border-color .15s,transform .15s}
+.idc:hover{text-decoration:none;border-color:var(--signal);transform:translateY(-1px)}
+.idc i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:800 .78rem var(--display);font-style:normal;color:#fff;flex:none}
+.idc b{display:block;font-weight:600}
+.idc span{color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
+
+/* research DNA */
+.dna{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:36px;align-items:center}
+.dna-wrap{position:relative;max-width:540px;width:100%;aspect-ratio:1;margin:0 auto}
+#dnaCanvas{width:100%;height:100%;display:block;cursor:crosshair}
+.dna-tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:.55rem .75rem;border-radius:var(--r-sm);font-size:.82rem;max-width:260px;opacity:0;transition:opacity .12s;line-height:1.4;z-index:2}
+.dna-legend{display:flex;flex-wrap:wrap;gap:.45rem;margin:1.1rem 0}
+.dna-legend button{display:inline-flex;align-items:center;gap:.45rem}
+.dna-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dna-facts{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.dna-facts li{border-top:1px solid var(--line);padding-top:10px;color:var(--muted);font-size:.88rem}
+.dna-facts b{display:block;color:var(--ink);font:800 1.4rem var(--display)}
+@media (max-width:860px){.dna{grid-template-columns:1fr}}
+
+/* contact status */
+.form-status{margin-top:12px;font-size:.92rem;min-height:1.4em}
+.form-status.ok{color:var(--pulse);font-weight:600}
+.form-status.err{color:#C0392B}
+.mail-line{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;padding:1rem 0;border-bottom:1px solid var(--line)}
+.mail-line b{font-weight:600;margin-right:auto}
+.mail-line code{font:500 .92rem var(--body);user-select:all;color:var(--muted)}
+.mail-line button{font:600 .8rem var(--body);padding:.3rem .7rem;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
 /* terminal */
 .term{position:fixed;inset:0;z-index:100;background:rgba(8,12,22,.55);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;padding:9vh 16px 16px}
 .term.open{display:flex}
@@ -425,6 +455,11 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
         <div class="ctas">
           <a class="btn" href="#publications">Explore my research</a>
           <a class="btn ghost" href="#collaborate">Find a project with me</a>
+        </div>
+        <div class="ids" aria-label="Research profiles">
+          <a class="idc" href="https://scholar.google.com/citations?hl=en&amp;user=5kZO4MoAAAAJ&amp;view_op=list_works&amp;sortby=pubdate" target="_blank" rel="noopener"><i style="background:#4285F4">GS</i><div><b>Google Scholar</b><span id="idCites">1,277 citations · h-index 21</span></div></a>
+          <a class="idc" href="https://www.scopus.com/authid/detail.uri?authorId=57202995656" target="_blank" rel="noopener"><i style="background:#E9711C">Sc</i><div><b>Scopus</b><span>Author ID 57202995656</span></div></a>
+          <a class="idc" href="https://orcid.org/0000-0002-6162-8200" target="_blank" rel="noopener"><i style="background:#A6CE39;color:#1b2a06">iD</i><div><b>ORCID</b><span>0000-0002-6162-8200</span></div></a>
         </div>
       </div>
       <div class="net-wrap">
@@ -522,6 +557,15 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
           <tr><th>Copyrights</th><td>26+</td><td></td></tr>
           <tr><th>Expert talks</th><td>45+</td><td></td></tr>
         </table>
+      </div>
+    </div>
+    <div class="panel dna" style="margin-top:28px" id="dna">
+      <div class="dna-wrap"><canvas id="dnaCanvas" aria-label="Research DNA: every paper as a bar on a ring, coloured by area"></canvas><div class="dna-tip" id="dnaTip"></div></div>
+      <div>
+        <h3 style="font-size:1.6rem;font-family:var(--display);font-weight:800">My research DNA</h3>
+        <p class="sub" style="margin-top:.4rem">Every paper is one bar on this ring, oldest at the top and moving clockwise to the newest. Colour shows the research area; bar height shows citations. No two researchers have the same pattern. Hover a bar to see the paper, or pick an area to light it up.</p>
+        <div class="dna-legend" id="dnaLegend"></div>
+        <ul class="dna-facts" id="dnaFacts"></ul>
       </div>
     </div>
     <div class="panel" style="margin-top:28px">
@@ -704,11 +748,13 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
         <select id="cs"><option>Research collaboration</option><option>Ph.D. / M.Tech guidance</option><option>Expert talk or FDP</option><option>Patent or copyright</option><option>Book chapter</option><option>Something else</option></select>
         <label for="cm">Message</label>
         <textarea id="cm" required></textarea>
-        <button class="btn" style="margin-top:16px" type="submit">Send message</button>
+        <button class="btn" style="margin-top:16px" type="submit" id="sendBtn">Send message</button>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
       </form>
       <div>
+        <div class="mail-line"><b>Email</b><code id="mailText">atul.kathole1910@gmail.com</code><button type="button" id="copyMail">Copy</button></div>
         <ul class="profiles">
-          <li><a href="https://scholar.google.com/citations?hl=en&user=5kZO4MoAAAAJ" target="_blank" rel="noopener">Google Scholar <span>1,277 citations</span></a></li>
+          <li><a href="https://scholar.google.com/citations?hl=en&amp;user=5kZO4MoAAAAJ&amp;view_op=list_works&amp;sortby=pubdate" target="_blank" rel="noopener">Google Scholar <span>1,277 citations</span></a></li>
           <li><a href="https://orcid.org/0000-0002-6162-8200" target="_blank" rel="noopener">ORCID <span>0000-0002-6162-8200</span></a></li>
           <li><a href="https://www.scopus.com/authid/detail.uri?authorId=57202995656" target="_blank" rel="noopener">Scopus <span>57202995656</span></a></li>
           <li><a href="https://yash-infotech.onrender.com/" target="_blank" rel="noopener">Yash Infotech <span>Research &amp; admission support</span></a></li>
@@ -767,7 +813,7 @@ dialog#lightbox button{position:absolute;top:10px;right:10px;background:var(--in
 <script>
 /* ============ CONFIG — edit these ============ */
 const CONFIG = {
-  email: "",                       // ← put your email here, e.g. "atul.kathole@adypu.edu.in" (contact form + vCard use it)
+  email: "atul.kathole1910@gmail.com",   // contact form, project enquiries and contact card use this
   counterNamespace: "atul-sir-onrender", // visitor counter namespace (keep it unique)
   siteUrl: "https://atul1986.github.io/website/",
   // Backend for visitor database, AI chatbot and Google sync. Leave "" when the site runs on its own server (Render).
@@ -1128,12 +1174,21 @@ function renderMatch(){
 }
 renderMatch();
 
-/* ============ CONTACT ============ */
-$('#cform').onsubmit=e=>{ e.preventDefault();
-  const body=`${$('#cm').value}\n\n— ${$('#cn').value} (${$('#ce').value})`;
-  if(!CONFIG.email){ navigator.clipboard?.writeText(body); toast('Contact email not set yet — your message was copied. Please reach out via ORCID or Scholar.'); return; }
-  location.href=`mailto:${CONFIG.email}?subject=${encodeURIComponent($('#cs').value+' — '+$('#cn').value)}&body=${encodeURIComponent(body)}`;
-  toast('Opening your email app…');
+/* ============ CONTACT — delivered by email through FormSubmit (no server needed) ============ */
+$('#copyMail').onclick=()=>{ const t=CONFIG.email; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Email address copied'),()=>{ const r=document.createRange(); r.selectNodeContents($('#mailText')); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); }); };
+$('#cform').onsubmit=async e=>{ e.preventDefault();
+  const name=$('#cn').value.trim(), from=$('#ce').value.trim(), reason=$('#cs').value, msg=$('#cm').value.trim();
+  const st=$('#formStatus'), btn=$('#sendBtn'); st.className='form-status'; st.textContent='Sending…'; btn.disabled=true;
+  const mailtoFallback=()=>{ st.className='form-status err'; st.innerHTML=`The message couldn't be sent from here. Please email it to <b>${esc(CONFIG.email)}</b> — your text is copied.`; try{navigator.clipboard.writeText(msg)}catch(e){}
+    location.href=`mailto:${CONFIG.email}?subject=${encodeURIComponent(reason+' — '+name)}&body=${encodeURIComponent(msg+'\n\n— '+name+' ('+from+')')}`; };
+  try{
+    const r=await fetch('https://formsubmit.co/ajax/'+CONFIG.email,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({name,email:from,_replyto:from,reason,message:msg,_subject:`Website message: ${reason} — ${name}`,_template:'table',_captcha:'false',page:location.href})});
+    const j=await r.json().catch(()=>({}));
+    if(r.ok && String(j.success)==='true'){ st.className='form-status ok'; st.textContent=`Thank you, ${name.split(' ')[0]}. Your message was sent — Dr. Kathole will reply to ${from}.`; $('#cform').reset(); toast('Message sent'); }
+    else mailtoFallback();
+  }catch(err){ mailtoFallback(); }
+  btn.disabled=false;
 };
 function pageUrl(){ return location.protocol.startsWith('http') ? location.origin+location.pathname : CONFIG.siteUrl; }
 try{ new QRCode($('#qr'),{text:pageUrl(),width:100,height:100,colorDark:'#142033',colorLight:'#ffffff'}); }catch(e){ $('#qr').style.display='none'; }
@@ -1210,7 +1265,7 @@ function applyScholar(d){
   if(exact || (d.citations||0) > M.cites){
     Object.assign(M,{cites:d.citations||M.cites, h:d.hIndex||M.h, i10:d.i10||M.i10, citesS:d.citationsSince||M.citesS, hS:d.hIndexSince||M.hS, i10S:d.i10Since||M.i10S, since:+d.sinceYear||M.since});
     const set=(sel,v)=>{ const el=$(sel); if(el&&v){ el.dataset.count=v; countUp(el,v); } };
-    set('#mCites',M.cites); set('#mH',M.h);
+    set('#mCites',M.cites); set('#mH',M.h); $('#idCites').textContent=`${fmt(M.cites)} citations · h-index ${M.h}`;
     $('#tC').textContent=fmt(M.cites); $('#tH').textContent=M.h; $('#tI').textContent=M.i10;
     $('#tCs').textContent=fmt(M.citesS); $('#tHs').textContent=M.hS; $('#tIs').textContent=M.i10S; $('#tSince').textContent='Since '+M.since;
     if(exact && d.perYear && Object.keys(d.perYear).length){ Object.entries(d.perYear).forEach(([y,v])=>{ if(+y>=2013) CITES[y]=v; }); renderChart(); }
@@ -1220,7 +1275,7 @@ function applyScholar(d){
   (d.pubs||[]).forEach(x=>{ if(!x.t) return; const p=map.get(norm(x.t));
     if(p){ if((x.c||0)>(p[3]||0)) p[3]=x.c; if(x.url&&!p.url) p.url=x.url; }
     else if(x.y>=2024){ const np=[x.t,x.v||'Journal article',x.y,x.c||null]; np.url=x.url; np.tags=AREAS.filter(a=>a.re.test(x.t)).map(a=>a.k); PUBS.push(np); map.set(norm(x.t),np); added++; } });
-  renderPubs(); renderTop();
+  renderPubs(); renderTop(); if(window.drawDNA) drawDNA();
   const when=d.updated?new Date(d.updated).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'';
   $('#srcNote').textContent=`${exact?'Google Scholar':'Google Scholar (Nov 2026), new papers via '+d.source}. Last automatic update ${when}.`;
 }
@@ -1279,59 +1334,171 @@ const TIPS=[
   show();
 })();
 
-/* ============ CHAT ASSISTANT ============ */
+/* ============ CHAT ASSISTANT ============
+ * Built-in knowledge base with keyword scoring, typo tolerance, follow-up memory ("how", "more", "yes")
+ * and paper search. If the Render server is connected (CONFIG.apiBase), AI answers are used first.
+ */
 (function(){
   const box=$('#chatbox'), log=$('#chatLog'), input=$('#chatIn'), fab=$('#botFab'), nudge=$('#botNudge');
-  const history=[];
+  const history=[]; let lastIntent=null, lastPapers=[];
+  const MAIL=()=>CONFIG.email;
   const strip=h=>{ const d=document.createElement('div'); d.innerHTML=h; return d.textContent; };
-  const link=(href,t)=>`<a href="${href}" ${/^https?:/.test(href)?'target="_blank" rel="noopener"':''} data-close>${t}</a>`;
-  const topPaper=()=>[...PUBS].filter(p=>p[3]).sort((a,b)=>b[3]-a[3])[0];
-  const INTENTS=[
-    {re:/^\s*(hi|hello|hey|namaste|namaskar|good (morning|afternoon|evening))\b/i, a:()=>`Namaste! I can tell you about Dr. Kathole's research, papers, patents, Ph.D. guidance, expert talks or recognition. What would you like to know?`},
-    {re:/rank|award|achiev|recogni|top ?1000|honou?r/i, a:()=>`Top1000 Scholar 2026 ranks Dr. Kathole <b>World #33</b> and <b>India #12</b> in Currency Recognition and Detection (2021–2025, top 7.9%). He also has 8 granted patents, ₹23.1 lakh in grants and 16+ years of Scopus access earned by reviewing. ${link('#gallery','See the recognition wall')}.`},
-    {re:/scopus|reviewer|reviewing|editor|elsevier|sciencedirect|reaxys/i, a:()=>`He is an editor and reviewer for reputed Scopus-indexed journals from IEEE, Springer, Elsevier and Taylor &amp; Francis. His Elsevier peer reviews have earned <b>6,089 days — over 16 years — of open access to Scopus, ScienceDirect and Reaxys</b>.`},
-    {re:/citation|h-?index|i10|impact|metric|cited/i, a:()=>{ const t=topPaper(); return `On Google Scholar: <b>${fmt(M.cites)}</b> citations, h-index <b>${M.h}</b>, i10-index <b>${M.i10}</b>. Most cited: “${esc(t[0])}” (${t[3]} citations). ${link('#impact','See the yearly chart')}.`; }},
-    {re:/ph\.?\s?d|guide|guidance|supervis|m\.?\s?tech|m\.?e\b|thesis|dissertation|project|student|intern/i, a:()=>`Yes — Dr. Kathole guides UG projects, M.Tech/M.E. dissertations and Ph.D. research in IoT, AI security, healthcare AI, smart agriculture, blockchain and cloud. Use ${link('#collaborate','Find a research project with me')} to get starting ideas, then send them through the ${link('#contact','contact form')}.`},
-    {re:/patent|copyright|ipr|invent/i, a:()=>`${PATENTS.length}+ patents are listed here (43+ published, 8 granted) plus 26+ copyrights. Granted ones include ${PATENTS.filter(p=>p[2]==='Granted').slice(0,3).map(p=>esc(p[0])).join('; ')}. ${link('#patents','Browse all patents')}.`},
-    {re:/grant|fund|isro|sponsor/i, a:()=>`Research grants total ₹23.1 lakh: ${GRANTS.map(g=>`${g[0]} ₹${fmt(g[1])}`).join(', ')}.`},
-    {re:/book|chapter|tinyml|cambridge|crc|edited|editor of/i, a:()=>`Dr. Kathole has edited <b>5 books</b> — 3 published and 2 coming soon — plus one authored book. Out now: <i>Bioengineering and IoT</i> (CRC Press, 2026) and <i>Smart Farm Management Systems</i> (Apple Academic Press, 2026). Coming soon: the TinyML healthcare volume with Cambridge Scholars, where the call for chapters is open — ${link('https://forms.gle/f6ZQpr9Rp3BbJhdj8','submit an abstract')}. ${link('#book','See all books')}.`},
-    {re:/talk|fdp|workshop|keynote|invite|webinar|session|lecture|seminar/i, a:()=>`He has delivered 45+ expert talks, FDPs and workshops on IoT, Python, machine learning, NS2/NS3, cyber security and research publishing. To invite him, choose “Expert talk or FDP” in the ${link('#contact','contact form')}.`},
-    {re:/contact|email|reach|meet|phone|whatsapp|call|connect/i, a:()=>`The quickest way is the ${link('#contact','contact form')}${CONFIG.email?` or email ${esc(CONFIG.email)}`:''}. You can also find him on ${link('https://scholar.google.com/citations?user=5kZO4MoAAAAJ','Google Scholar')}, ${link('https://orcid.org/0000-0002-6162-8200','ORCID')} and ${link('https://www.scopus.com/authid/detail.uri?authorId=57202995656','Scopus')}.`},
-    {re:/yash|admission|publication support|research support|service/i, a:()=>`Through ${link('https://yash-infotech.onrender.com/','Yash Infotech, Pune')} he supports free admission guidance, M.Tech/Ph.D. research support, publication &amp; IPR and tech solutions.`},
-    {re:/educat|qualif|degree|studied|alma/i, a:()=>`Ph.D. in CSE (SGBAU), M.E. in CSE (Pune University), MBA in IT (Mumbai University) and B.E. in CSE (SGBAU).`},
-    {re:/experience|career|worked|college|adypu|designation|dean|position|current/i, a:()=>`He is Professor and Associate Dean – Academics at Ajeenkya D. Y. Patil University, Pune, with 16.6+ years of teaching — earlier at DIT Pimpri, PCCOE, Zeal COER and JDIET Yavatmal. ${link('#about','See the full career')}.`},
-    {re:/research|area|interest|topic|domain|field|work on|specializ/i, a:()=>`His research covers ${AREAS.map(a=>a.label).join(', ')}. Ask me “papers on blockchain” or any topic to see related work.`},
-    {re:/who|about|yourself|introduce|tell me/i, a:()=>`Dr. Atul B. Kathole is a Professor of Computer Engineering and Associate Dean – Academics at ADYPU, Pune. He works on IoT, machine learning and cyber security, with ${fmt(M.cites)}+ citations, 43+ patents and a Top1000 Scholar world rank of #33.`},
-    {re:/thank|thanks|great|nice|awesome|helpful/i, a:()=>`You're welcome! Anything else — papers, guidance or talks?`}
+  const link=(href,t)=>`<a href="${href}" ${/^https?:|^mailto:/.test(href)?'target="_blank" rel="noopener"':''} data-close>${t}</a>`;
+  const mail=()=>`<b style="user-select:all">${esc(MAIL())}</b>`;
+  const SCH='https://scholar.google.com/citations?hl=en&user=5kZO4MoAAAAJ&view_op=list_works&sortby=pubdate';
+  const SCO='https://www.scopus.com/authid/detail.uri?authorId=57202995656';
+  const ORC='https://orcid.org/0000-0002-6162-8200';
+  const ol=items=>`<ol style="margin:.4rem 0 .2rem 1.2rem">${items.map(i=>`<li>${i}</li>`).join('')}</ol>`;
+  const ul=items=>`<ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+  const topPapers=n=>[...PUBS].filter(p=>p[3]).sort((a,b)=>b[3]-a[3]).slice(0,n);
+
+  /* Each intent: keywords (phrases score higher), answer, optional "more" for follow-ups, and suggested next questions */
+  const KB=[
+    {id:'greet', w:.6, kw:['hi','hello','hey','hii','namaste','namaskar','good morning','good afternoon','good evening','kasa','kaise','sir','helo'],
+      a:()=>`Namaste! 🙏 I'm Dr. Atul Kathole's assistant. I can help with Ph.D. or M.Tech guidance, project ideas, papers, patents, books, expert talks, or how to reach him. What would you like to know?`,
+      chips:['Can you guide my Ph.D.?','Suggest a project idea','How do I contact him?','Show achievements']},
+    {id:'help', kw:['what can you do','help','menu','options','what can i ask','features','assist'],
+      a:()=>`You can ask me things like:${ul(['“Can you guide my Ph.D. in IoT?”','“Papers on blockchain” or any topic','“How many citations?” / “What is your h-index?”','“Which patents are granted?”','“Invite for an FDP” / “Call for book chapters”','“How do I publish in a Scopus journal?”'])}`,
+      chips:['Papers on healthcare AI','Granted patents','How to publish a paper?']},
+    {id:'bot', kw:['who are you','are you human','are you ai','are you a bot','your name','chatbot','are you real'],
+      a:()=>`I'm the website assistant for Dr. Atul B. Kathole — not him personally. I answer from his profile, papers and patents. For anything personal, write to him at ${mail()} and he replies himself.`},
+    {id:'about', kw:['who is','about him','about you','introduce','tell me about','biography','bio','dr kathole','dr. kathole'],
+      a:()=>`Dr. Atul B. Kathole is Professor of Computer Engineering and Associate Dean – Academics at Ajeenkya D. Y. Patil University, Pune, with 16.6+ years of teaching. His work spans IoT, machine learning, cyber security, blockchain and cloud — ${fmt(M.cites)}+ citations, h-index ${M.h}, 43+ patents, 5 edited books, and World Rank #33 in Top1000 Scholar 2026.`,
+      more:()=>`He started teaching at JDIET Yavatmal in 2010, then moved to Pune (Zeal COER, PCCOE, DIT Pimpri) before joining ADYPU in 2025. He is also an editor and reviewer for Scopus-indexed journals and has delivered 45+ expert talks. ${link('#journey','See his journey')}.`,
+      chips:['His research areas','Achievements','Career history']},
+    {id:'guide', kw:['phd','ph.d','ph d','doctorate','guide','guidance','supervisor','supervise','mentor','m.tech','mtech','m tech','m.e','dissertation','thesis','research scholar','be project','final year project','student','under you','work with you','join'],
+      a:()=>`Yes — Dr. Kathole guides <b>UG final-year projects, M.Tech/M.E. dissertations and Ph.D. research</b> in IoT, cyber security, healthcare AI, smart agriculture, blockchain and cloud computing. Want to know how to start?`,
+      more:()=>`Here's how to start:${ol([`Open ${link('#collaborate','Find a research project with me')}, choose your area and level, and note the ideas you like.`,`Email ${mail()} (or use the ${link('#contact','contact form')}) with your name, university/college, current degree, area of interest and a short CV.`,`He replies to discuss a topic, timeline and a publication plan. Ph.D. registration itself follows your university's admission process (entrance test / research committee).`])}`,
+      chips:['Suggest a project idea','Which areas?','Email address']},
+    {id:'idea', kw:['project idea','topic','suggest','idea','research problem','what should i work','which topic','title for'],
+      a:()=>{ const pick=['Lightweight intrusion detection for IoT gateways','TinyML wearable that flags early cardiac irregularity','Phone-camera leaf disease detector for onion and tomato','Federated learning for privacy-safe hospital data','Blockchain + QR anti-counterfeit system for medicines','Energy-aware VM scheduling with metaheuristics'];
+        return `A few starting ideas built on his published work:${ul(pick.slice(0,4))}For ideas tuned to your level (UG, M.Tech or Ph.D.), try ${link('#collaborate','Find a research project with me')} — it lists ideas and the related paper of his for each.`; },
+      chips:['Can you guide my Ph.D.?','Papers on IoT security']},
+    {id:'contact', kw:['contact','email','mail','e-mail','reach','connect','phone','mobile','number','whatsapp','call','meet','appointment','address to write'],
+      a:()=>`You can email Dr. Kathole at ${mail()} or use the ${link('#contact','contact form')} on this page — it delivers straight to his inbox and he replies by email.`,
+      more:()=>`To get a quick reply, mention:${ul(['Your name, institute and current degree or role','What you need (guidance, talk, collaboration, review, book chapter…)','Any deadline or dates','For guidance: your area of interest and a short CV'])}`,
+      chips:['What should I write?','Invite for an expert talk']},
+    {id:'where', kw:['where','location','located','office','campus','university','college name','address','which city'],
+      a:()=>`He is at <b>Ajeenkya D. Y. Patil University (ADYPU), Pune, Maharashtra</b> — Department of Computer Engineering, School of Engineering. Please email ${mail()} before visiting so he can confirm a time.`},
+    {id:'rank', kw:['rank','ranking','award','achievement','achievements','recognition','top1000','top 1000','honour','honor','world rank','famous','best'],
+      a:()=>`Highlights:${ul(['<b>World Rank #33, India Rank #12</b> — Top1000 Scholar 2026 (Currency Recognition and Detection, top 7.9%)',`<b>${fmt(M.cites)}+ citations</b>, h-index ${M.h}, i10-index ${M.i10}`,'<b>43+ patents</b> published, 8 granted · 26+ copyrights','<b>5 edited books</b> (CRC Press, Apple Academic Press, Cambridge Scholars)','<b>16+ years</b> of Scopus/ScienceDirect access earned as an Elsevier reviewer','₹23.1 lakh in research grants'])}${link('#gallery','See the recognition wall')}`,
+      chips:['What is Top1000 Scholar?','Granted patents','Books']},
+    {id:'rankmore', kw:['what is top1000','top1000 scholar','scholarly index','rank 33','how ranked','explain the rank','explain the world rank'],
+      a:()=>`Top1000 Scholar (by Scholarly Index) ranks researchers by research impact within a topic over a time window. For 2021–2025 in <i>Currency Recognition and Detection</i>, Dr. Kathole is <b>#33 in the world</b> and <b>#12 in India</b>, with an impact score of 76.67 — in the top 7.9%. The certificate is on the ${link('#gallery','recognition wall')}.`},
+    {id:'scopus', kw:['scopus','reviewer','review','reviewing','editor','editorial','elsevier','sciencedirect','reaxys','journal review','referee'],
+      a:()=>`Dr. Kathole is an <b>editor and reviewer</b> for reputed Scopus-indexed journals from IEEE, Springer, Elsevier and Taylor &amp; Francis. His Elsevier peer reviews have earned him <b>6,089 days — over 16 years — of access to Scopus, ScienceDirect and Reaxys</b> (30 days per accepted review). Scopus profile: ${link(SCO,'Author ID 57202995656')}.`,
+      chips:['How to publish a paper?','Citations']},
+    {id:'metrics', kw:['citation','citations','h-index','hindex','h index','i10','impact','cited','metric','google scholar','scholar'],
+      a:()=>{ const t=topPapers(1)[0]; return `On Google Scholar: <b>${fmt(M.cites)}</b> citations, h-index <b>${M.h}</b>, i10-index <b>${M.i10}</b> (since ${M.since}: ${fmt(M.citesS)} / ${M.hS} / ${M.i10S}). Most cited: “${esc(t[0])}” — ${t[3]} citations. ${link(SCH,'Open Google Scholar')} · ${link('#impact','yearly chart')}.`; },
+      more:()=>`Most cited papers:${ol(topPapers(5).map(p=>`${esc(p[0])} <small>(${esc(p[1])}, ${p[2]} — ${p[3]} cites)</small>`))}`,
+      chips:['Latest papers','Research DNA','Scopus profile']},
+    {id:'profiles', kw:['orcid','scopus id','scopus profile','profile link','researcher id','links','google scholar link'],
+      a:()=>`His research profiles:${ul([link(SCH,'Google Scholar')+` — ${fmt(M.cites)} citations`,link(SCO,'Scopus')+' — Author ID 57202995656',link(ORC,'ORCID')+' — 0000-0002-6162-8200'])}`},
+    {id:'count', kw:['how many paper','how many publication','number of paper','total paper','publications count','how many research'],
+      a:()=>`He has <b>67+ SCI/Scopus-indexed publications</b> and about ${Math.max(150,PUBS.length)} works listed on Google Scholar, including journal papers, conference papers and book chapters. ${link('#publications','Search them here')}.`,
+      chips:['Latest papers','Most cited']},
+    {id:'latest', kw:['latest','recent','new paper','newest','2026','2025','current work','currently working'],
+      a:()=>{ const l=[...PUBS].sort((a,b)=>b[2]-a[2]).slice(0,5); return `Latest work:${ol(l.map(p=>`${esc(p[0])} <small>(${esc(p[1])}, ${p[2]})</small>`))}${link('#publications','See all publications')}`; },
+      chips:['Most cited','Papers on IoT']},
+    {id:'areas', kw:['research area','areas','interest','domain','field','specialization','specialisation','expertise','which areas','work on'],
+      a:()=>`His research areas: ${AREAS.map(a=>`<b>${a.label}</b>`).join(', ')}. Ask “papers on &lt;topic&gt;” to see related work, or look at the ${link('#dna','Research DNA ring')}.`,
+      chips:['Papers on blockchain','Papers on agriculture','Papers on healthcare AI']},
+    {id:'patent', kw:['patent','patents','copyright','granted','invention','ipr','intellectual property'],
+      a:()=>`<b>43+ patents</b> published (8 granted, including Australian innovation patents) and <b>26+ copyrights</b>. Granted ones include:${ul(PATENTS.filter(p=>p[2]==='Granted').map(p=>esc(p[0])))}${link('#patents','Browse all patents')}`,
+      more:()=>`Want to file your own? General steps:${ol(['Search existing patents (Google Patents, InPASS) to check novelty','Write a clear description with drawings and claims','File a provisional application at the Indian Patent Office to secure your date','File the complete specification within 12 months, then request examination'])}Dr. Kathole helps students and faculty with this — email ${mail()}.`,
+      chips:['How to file a patent?','Grants']},
+    {id:'patentHow', kw:['file a patent','how to file','patent process','apply for patent','get a patent','patent filing','provisional'],
+      a:()=>KB.find(k=>k.id==='patent').more(), chips:['Granted patents','How to publish a paper?']},
+    {id:'dna', kw:['research dna','dna','fingerprint','ring'],
+      a:()=>`The ${link('#dna','Research DNA ring')} shows every paper as one bar — oldest at the top, moving clockwise to the newest. Colour = research area, height = citations. Hover a bar to see the paper, or pick an area to highlight it.`},
+    {id:'publish', kw:['how to publish','publish','write paper','writing paper','research paper','q1','q2','sci journal','scopus journal','get published','rejection','journal selection','paper writing'],
+      a:()=>`Tips from his experience:${ol(['Read 30–40 recent papers in your area and write down the gap','Build a working model and compare with at least two published baselines','Pick the journal by reading its last ten papers, not just impact factor','Write the abstract first, then methods, results, and introduction last','Treat reviews as free advice — revise and resubmit within two weeks'])}He also gives an expert talk on research and publishing — ${link('#contact','invite him')}.`,
+      chips:['Suggest a project idea','Invite for an expert talk']},
+    {id:'grant', kw:['grant','grants','funding','fund','isro','sponsored','money for research'],
+      a:()=>`Research grants total <b>₹23.1 lakh</b>:${ul(GRANTS.map(g=>`${esc(g[0])} — ₹${fmt(g[1])}`))}`},
+    {id:'books', kw:['book','books','edited','editor of','cambridge','crc','apple academic','bioengineering','smart farm','operation research'],
+      a:()=>`He has edited <b>5 books</b> — 3 published, 2 coming soon — and authored one:${ul(['<i>Bioengineering and IoT: Shaping the Future of Healthcare</i> — CRC Press, 2026','<i>Smart Farm Management Systems: Integrating IoT with Big Data Analytics</i> — Apple Academic Press, 2026','Coming soon: <i>Intelligent IoT-Enabled Healthcare System Using TinyML for Early Diagnosis</i> — Cambridge Scholars (call for chapters open)','Authored: <i>Operation Research: Travelling Salesman Problem</i>'])}${link('#book','See all books')}`,
+      chips:['Call for book chapters','Smart Farm book details']},
+    {id:'chapter', kw:['call for book','book chapter','chapter','call for chapter','call for paper','submit chapter','abstract','tinyml','contribute'],
+      a:()=>`The call for chapters is open for <i>Intelligent IoT-Enabled Healthcare System Using Tiny Machine Learning for Early Diagnosis</i> (Cambridge Scholars Publishing, Scopus indexed). Topics include TinyML, wearables, biomedical sensors, edge AI, blockchain and clinical case studies. ${link('https://forms.gle/f6ZQpr9Rp3BbJhdj8','Submit your abstract')} or email the editors at <b>bioenggiot24@gmail.com</b>.`},
+    {id:'talk', kw:['talk','fdp','workshop','keynote','invite','webinar','seminar','guest lecture','lecture','resource person','session','sttp','training'],
+      a:()=>`He has delivered <b>45+ expert talks, FDPs and workshops</b> — IoT, Python, machine learning, NS2/NS3, cyber security, and research &amp; publishing. To invite him, email ${mail()}.`,
+      more:()=>`Please include:${ul(['Institute name and event title','Date, time and mode (online/offline)','Audience (UG, PG, faculty) and expected size','Topic and session length'])}`,
+      chips:['What should I include?','Email address']},
+    {id:'collab', kw:['collaborat','industry','consult','consultancy','partner','joint research','mou','company','startup'],
+      a:()=>`He's open to research collaboration, industry projects and consultancy in IoT, AI security, healthcare AI and smart agriculture. Email ${mail()} with a short note on the problem, data available and timeline.`},
+    {id:'intern', kw:['intern','internship','recommendation','lor','letter of recommendation','reference letter'],
+      a:()=>`For internships or recommendation letters, email ${mail()} with your CV, the program or position, the deadline, and the work you did with him.`},
+    {id:'fees', kw:['fee','fees','cost','charge','price','paid','payment','salary'],
+      a:()=>`I don't have fee details. Please email ${mail()} and he'll let you know directly.`},
+    {id:'career', kw:['experience','career','worked','previous','designation','dean','position','current role','job','years of teaching'],
+      a:()=>`Career:${ul(['2025 – now: Professor &amp; Associate Dean – Academics, ADYPU Pune','2023 – 2025: Associate Professor, DIT Pimpri, Pune','2021 – 2023: Assistant Professor (IT), PCCOE Pune','2017 – 2021: Assistant Professor, Zeal COER Pune','2010 – 2017: Assistant Professor, JDIET Yavatmal'])}`},
+    {id:'edu', kw:['education','qualification','degree','studied','phd from','alma mater','university of'],
+      a:()=>`Ph.D. in CSE (SGBAU), M.E. in CSE (Pune University), MBA in IT (Mumbai University) and B.E. in CSE (SGBAU).`},
+    {id:'yash', kw:['yash','yash infotech','admission','admission help','publication support','research support','services'],
+      a:()=>`Through ${link('https://yash-infotech.onrender.com/','Yash Infotech, Pune')} he supports free admission counselling, M.Tech/Ph.D. research support, publication &amp; IPR guidance and tech solutions.`},
+    {id:'visitors', kw:['visitor','visitors','views','how many people'],
+      a:()=>{ const v=window.__vis; return v&&v.total!=null?`This site has had <b>${fmt(v.total)}</b> visits${v.day!=null?`, ${fmt(v.day)} today`:''}. You are visitor #${fmt(v.you)}. 🎉`:'The visitor counter is still loading.'; }},
+    {id:'thanks', kw:['thank','thanks','thx','great','nice','awesome','helpful','super','dhanyavad'],
+      a:()=>`You're welcome! Anything else — guidance, papers, patents or talks?`, chips:['Can you guide my Ph.D.?','How do I contact him?']},
+    {id:'bye', kw:['bye','goodbye','see you','ok bye','tata'],
+      a:()=>`Goodbye, and all the best with your research! You can always write to ${mail()}.`}
   ];
-  const STOP=new Set('where when what which does have know want need could would should paper papers about with have does what which your from that this using based show find give some more research work works published publish there their please tell list'.split(' '));
-  function localAnswer(q){
-    const wantsPapers=/paper|publication|article|journal|published|work on/i.test(q);
-    const words=(q.toLowerCase().match(/[a-z0-9]{4,}/g)||[]).filter(w=>!STOP.has(w));
-    const hits=PUBS.map(p=>[p,words.filter(w=>(p[0]+' '+p[1]).toLowerCase().includes(w)).length]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]||(b[0][3]||0)-(a[0][3]||0)).slice(0,4);
-    if(wantsPapers && hits.length) return `Here are related papers:<ul>${hits.map(([p])=>`<li>${esc(p[0])} <small>(${esc(p[1])}, ${p[2]})</small></li>`).join('')}</ul>${link('#publications','Search all publications')}.`;
-    for(const it of INTENTS) if(it.re.test(q)) return it.a(q);
-    if(hits.length) return `These papers may be what you're looking for:<ul>${hits.map(([p])=>`<li>${esc(p[0])} <small>(${p[2]})</small></li>`).join('')}</ul>`;
-    return `I don't have that detail yet. Please send it through the ${link('#contact','contact form')} and Dr. Kathole will reply personally.`;
+
+  /* ---- matching ---- */
+  const norm=q=>' '+q.toLowerCase().replace(/[^a-z0-9.\s'-]/g,' ').replace(/\s+/g,' ').trim()+' ';
+  function lev(a,b){ if(Math.abs(a.length-b.length)>1) return 2; const d=[...Array(b.length+1).keys()]; for(let i=1;i<=a.length;i++){ let prev=d[0]; d[0]=i; for(let j=1;j<=b.length;j++){ const t=d[j]; d[j]=Math.min(d[j]+1,d[j-1]+1,prev+(a[i-1]===b[j-1]?0:1)); prev=t; } } return d[b.length]; }
+  function score(q,it){ let s=0; const words=q.trim().split(' ');
+    for(const k of it.kw){ const kk=k.trim();
+      if(kk.includes(' ')){ if(q.includes(' '+kk)) s+=3; continue; }
+      if(new RegExp('(^|\\s)'+kk.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\s|$|s\\s)').test(q)) s+=kk.length>3?2:1.2;
+      else if(kk.length>=5 && words.some(w=>w.length>=4 && lev(w,kk)<=1)) s+=1.5; }
+    return s; }
+  const FOLLOW=/^\s*(what should i (write|include|send|mention)|what to (write|include|send)|tell me|how|how\?|how to|how so|yes|yeah|yep|ok|okay|sure|more|tell me more|details|detail|explain|then|next|what next|and|go on|continue|please|pls|kaise|kasa|haan|ho|why|steps|process)\s*\??\s*$/i;
+  const STOP=new Set('paper papers about with have does what which your from that this using based show find give some more research work works published publish there their please tell list where when know want need could would should also any on in of the for and'.split(' '));
+
+  function paperSearch(q){
+    const words=(q.toLowerCase().match(/[a-z0-9]{3,}/g)||[]).filter(w=>!STOP.has(w));
+    if(!words.length) return [];
+    return PUBS.map(p=>[p,words.filter(w=>(p[0]+' '+p[1]+' '+p.tags.join(' ')).toLowerCase().includes(w)).length]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]||(b[0][3]||0)-(a[0][3]||0)).slice(0,5).map(x=>x[0]);
   }
-  const linkify=t=>esc(t).replace(/(https?:\/\/[^\s)]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/(^|\s)#(gallery|publications|patents|collaborate|book|contact|impact|about|journey|leadership)\b/g,'$1<a href="#$2" data-close>#$2</a>').replace(/\n/g,'<br>');
+  function answer(raw){
+    const q=norm(raw);
+    // follow-up on the previous topic
+    if(FOLLOW.test(raw) && lastIntent){ if(lastIntent.more){ const it=lastIntent; lastIntent={...it,more:null}; return {html:it.more(),chips:it.chips}; }
+      if(lastPapers.length) return {html:`More detail on these papers is on Google Scholar:${ul(lastPapers.slice(0,3).map(p=>link('https://scholar.google.com/scholar?q='+encodeURIComponent(p[0]),esc(p[0]))))}`}; }
+    // explicit paper search: "papers on X", "work in X", "publication about X"
+    const wantsPapers=!/^\s*(how|why|can|should|tips|what is|what are the steps)\b/i.test(raw) && /(paper|publication|article|journal|research) (on|about|in|related)|^\s*(papers?|publications?)\b|work on /i.test(raw);
+    if(wantsPapers){ const hits=paperSearch(raw.replace(/papers?|publications?|articles?|on|about|related|research|work/gi,' '));
+      if(hits.length){ lastPapers=hits; lastIntent=null; return {html:`Here are related papers:${ol(hits.map(p=>`${esc(p[0])} <small>(${esc(p[1])}, ${p[2]}${p[3]?` — ${p[3]} cites`:''})</small>`))}${link('#publications','Search all publications')}`,chips:['Most cited','Latest papers']}; } }
+    // intents
+    let best=null,bs=0; for(const it of KB){ const s=score(q,it)*(it.w||1); if(s>bs){bs=s;best=it;} }
+    if(best && bs>=0.7){ lastIntent=best; return {html:best.a(raw),chips:best.chips}; }
+    // topic words without "papers": try search
+    const hits=paperSearch(raw); if(hits.length){ lastPapers=hits; return {html:`These papers of his match your question:${ol(hits.map(p=>`${esc(p[0])} <small>(${p[2]})</small>`))}`,chips:['Can you guide my Ph.D.?']}; }
+    lastIntent=null;
+    return {html:`I'm not sure I understood that. You can ask about <b>Ph.D./M.Tech guidance</b>, <b>project ideas</b>, <b>papers on a topic</b>, <b>patents</b>, <b>books</b>, <b>expert talks</b> or <b>contact details</b>. Or write directly to ${mail()} — he replies personally.`,chips:['What can you do?','Can you guide my Ph.D.?','How do I contact him?']};
+  }
+
+  const linkify=t=>esc(t).replace(/(https?:\/\/[^\s)]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/(^|\s)#(gallery|publications|patents|collaborate|book|contact|impact|about|journey|leadership|news|dna)\b/g,'$1<a href="#$2" data-close>#$2</a>').replace(/\n/g,'<br>');
   function add(from,html){ const d=document.createElement('div'); d.className='msg from-'+from; d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; return d; }
+  function setChips(list){ const c=list&&list.length?list:DEFAULT_CHIPS; $('#chatChips').innerHTML=c.map(x=>`<button class="chip" type="button">${esc(x)}</button>`).join(''); $('#chatChips').querySelectorAll('button').forEach(b=>b.onclick=()=>ask(b.textContent)); }
   async function ask(q){
     q=q.trim(); if(!q) return; add('user',esc(q)); input.value='';
     const typing=add('bot','<span class="typing"><i></i><i></i><i></i></span>');
-    const local=localAnswer(q); let reply=null; const t0=Date.now();
+    const local=answer(q); let reply=null; const t0=Date.now();
     if(onServer){ try{ const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),15000);
-      const r=await fetch(API+'/api/chat',{method:'POST',signal:ctrl.signal,headers:{'content-type':'application/json'},body:JSON.stringify({message:q,history,vid:VID,localAnswer:strip(local)})});
+      const r=await fetch(API+'/api/chat',{method:'POST',signal:ctrl.signal,headers:{'content-type':'application/json'},body:JSON.stringify({message:q,history,vid:VID,localAnswer:strip(local.html)})});
       clearTimeout(to); if(r.ok){ const j=await r.json(); reply=j.reply; } }catch(e){} }
-    const wait=Math.max(0,550-(Date.now()-t0)); await new Promise(r=>setTimeout(r,wait));
-    typing.innerHTML = reply ? linkify(reply) : local;
-    history.push({role:'user',text:q},{role:'assistant',text:reply||strip(local)}); log.scrollTop=log.scrollHeight;
+    const wait=Math.max(0,500+Math.min(700,local.html.length)-(Date.now()-t0)); await new Promise(r=>setTimeout(r,wait));
+    typing.innerHTML = reply ? linkify(reply) : local.html;
+    setChips(local.chips);
+    history.push({role:'user',text:q},{role:'assistant',text:reply||strip(local.html)}); log.scrollTop=log.scrollHeight;
   }
-  const CHIPS=['Can you guide my Ph.D.?','Show your achievements','Papers on blockchain','Invite for an expert talk','Scopus access & reviewing','Call for book chapters'];
-  $('#chatChips').innerHTML=CHIPS.map(c=>`<button class="chip" type="button">${c}</button>`).join('');
-  $('#chatChips').querySelectorAll('button').forEach(b=>b.onclick=()=>ask(b.textContent));
+  const DEFAULT_CHIPS=['Can you guide my Ph.D.?','Suggest a project idea','Show achievements','Papers on blockchain','Invite for an expert talk','How do I contact him?'];
+  setChips(DEFAULT_CHIPS);
   function open(){ box.hidden=false; fab.style.display='none'; nudge.classList.remove('show'); try{sessionStorage.setItem('nudged','1')}catch(e){}
-    if(!log.children.length) add('bot',`Hi! I'm Dr. Kathole's assistant. Ask me about his research, papers, patents, Ph.D. guidance, expert talks or recognition.`);
+    if(!log.children.length){ const h=new Date().getHours(); add('bot',`${h<12?'Good morning':h<17?'Good afternoon':'Good evening'}! 👋 I'm Dr. Atul Kathole's assistant. Ask me about Ph.D. guidance, project ideas, papers, patents, books or expert talks — or tap a question below.`); }
     setTimeout(()=>input.focus(),50); }
   function close(){ box.hidden=true; fab.style.display=''; }
   fab.onclick=open; nudge.onclick=open; $('#chatClose').onclick=close;
@@ -1340,7 +1507,7 @@ const TIPS=[
   box.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
   let nudged=false; try{ nudged=!!sessionStorage.getItem('nudged'); }catch(e){}
   if(!nudged) setTimeout(()=>{ if(box.hidden){ nudge.classList.add('show'); setTimeout(()=>nudge.classList.remove('show'),9000); try{sessionStorage.setItem('nudged','1')}catch(e){} } },7000);
-  window.openChat=open;
+  window.openChat=open; window.__botAnswer=answer;
 })();
 
 /* ============ BOOKS SHELF (static list + titles synced from Google Books) ============ */
@@ -1390,10 +1557,67 @@ function applyWeb(d){
   // new works from Crossref
   const pn=t=>String(t).toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,55); const map=new Set(PUBS.map(p=>pn(p[0]))); let added=0;
   (d.works||[]).forEach(w=>{ if(!w.t||w.y<2024||map.has(pn(w.t))) return; const np=[w.t,w.v||'',w.y,null]; np.url=w.url; np.tags=AREAS.filter(a=>a.re.test(w.t)).map(a=>a.k); PUBS.push(np); map.add(pn(w.t)); added++; });
-  if(added) renderPubs();
+  if(added){ renderPubs(); if(window.drawDNA) drawDNA(); }
   if(d.updated) $('#syncNote').textContent=`Synced from Google Books, Google News and Crossref on ${new Date(d.updated).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}, searching ${ (d.names||CONFIG.nameVariants).length } spellings of my name.`;
 }
 if(onServer) fetch(API+'/api/web').then(r=>r.ok?r.json():null).then(d=>{ if(d) applyWeb(d); }).catch(()=>{});
+
+/* ============ RESEARCH DNA — every paper as a bar on a ring ============ */
+(function(){
+  const COLORS={IoT:'#2F5BEA',ML:'#8B5CF6',Security:'#E0484F',Blockchain:'#D99A0B',Cloud:'#0EA5E9',Health:'#E2558F',Agri:'#3F9A34',VANET:'#14A38E',Other:'#94A3B8'};
+  const cv=$('#dnaCanvas'), tip=$('#dnaTip'), ctx=cv.getContext('2d');
+  let focus=null, hover=-1, W=0, list=[], geom=[];
+  const primary=p=>p.tags.find(t=>t!=='ML')||p.tags[0]||'Other';
+  function legend(){
+    const counts={}; PUBS.forEach(p=>{ const k=primary(p); counts[k]=(counts[k]||0)+1; });
+    const keys=Object.keys(COLORS).filter(k=>counts[k]);
+    $('#dnaLegend').innerHTML=keys.map(k=>{ const a=AREAS.find(x=>x.k===k); return `<button class="chip" aria-pressed="${focus===k}" data-k="${k}"><i style="background:${COLORS[k]}"></i>${a?a.label:'Other'} <span style="opacity:.6">${counts[k]}</span></button>`; }).join('');
+    $('#dnaLegend').querySelectorAll('button').forEach(b=>b.onclick=()=>{ focus=focus===b.dataset.k?null:b.dataset.k; legend(); draw(); });
+    const yrs=PUBS.map(p=>p[2]).filter(Boolean), span=Math.max(...yrs)-Math.min(...yrs.filter(y=>y>2000));
+    const top=keys.filter(k=>k!=='Other').sort((a,b)=>counts[b]-counts[a])[0];
+    $('#dnaFacts').innerHTML=[[PUBS.length,'papers on the ring'],[span+' yrs','of continuous publishing'],[(AREAS.find(a=>a.k===top)||{}).label||top,'strongest strand'],[PUBS.filter(p=>p[2]>=2024).length,'papers since 2024']]
+      .map(([v,l])=>`<li><b>${v}</b>${l}</li>`).join('');
+  }
+  function draw(){
+    const r=cv.getBoundingClientRect(); if(!r.width) return; const dpr=Math.min(2,devicePixelRatio||1);
+    W=r.width; cv.width=W*dpr; cv.height=W*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,W);
+    const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    list=[...PUBS].filter(p=>p[2]>2000).sort((a,b)=>a[2]-b[2]); const n=list.length; if(!n) return;
+    const cx=W/2, cy=W/2, r0=W*0.24, maxL=W*0.2, step=Math.PI*2/n, maxC=Math.log1p(Math.max(...list.map(p=>p[3]||0)));
+    geom=[];
+    // guide rings
+    ctx.strokeStyle=css('--line'); ctx.lineWidth=1;
+    [r0, r0+maxL*0.5, r0+maxL].forEach(rr=>{ ctx.beginPath(); ctx.arc(cx,cy,rr,0,7); ctx.stroke(); });
+    list.forEach((p,i)=>{
+      const ang=-Math.PI/2+i*step+step/2, c=p[3]||0, len=W*0.025+(maxC?Math.log1p(c)/maxC:0)*maxL;
+      const k=primary(p), dim=(focus&&k!==focus)||(hover>=0&&hover!==i&&!focus);
+      ctx.strokeStyle=COLORS[k]; ctx.globalAlpha=dim?(focus?.12:.55):1; ctx.lineWidth=Math.max(2,Math.min(7,step*r0*0.75)); ctx.lineCap='round';
+      const x1=cx+Math.cos(ang)*r0, y1=cy+Math.sin(ang)*r0, x2=cx+Math.cos(ang)*(r0+len), y2=cy+Math.sin(ang)*(r0+len);
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      geom.push({ang,len});
+    });
+    ctx.globalAlpha=1;
+    // year labels where the year changes
+    ctx.fillStyle=css('--muted'); ctx.font=`500 ${W<400?9:11}px "IBM Plex Sans",sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    let lastY=0, lastAng=-9; list.forEach((p,i)=>{ if(p[2]!==lastY){ const ang=-Math.PI/2+i*step; lastY=p[2]; if(ang-lastAng<0.22) return; lastAng=ang;
+      const rr=r0-14; ctx.fillText("’"+String(p[2]).slice(2),cx+Math.cos(ang)*rr,cy+Math.sin(ang)*rr); } });
+    // centre
+    ctx.fillStyle=css('--ink'); ctx.font=`800 ${Math.round(W*0.085)}px "Bricolage Grotesque",sans-serif`; ctx.fillText(focus?list.filter(p=>primary(p)===focus).length:n,cx,cy-W*0.02);
+    ctx.fillStyle=css('--muted'); ctx.font=`500 ${Math.round(W*0.028)}px "IBM Plex Sans",sans-serif`;
+    ctx.fillText(focus?((AREAS.find(a=>a.k===focus)||{}).label||'papers'):'papers · '+list[0][2]+'–'+list[n-1][2],cx,cy+W*0.05);
+  }
+  cv.addEventListener('mousemove',e=>{ const r=cv.getBoundingClientRect(), x=e.clientX-r.left-W/2, y=e.clientY-r.top-W/2, d=Math.hypot(x,y), r0=W*0.24;
+    let i=-1; if(d>r0-6 && d<r0+W*0.23){ let a=Math.atan2(y,x)+Math.PI/2; if(a<0) a+=Math.PI*2; i=Math.floor(a/(Math.PI*2/list.length)); if(d>r0+geom[i].len+10) i=-1; }
+    if(i!==hover){ hover=i; draw(); }
+    if(i>=0){ const p=list[i]; tip.style.opacity=1; tip.style.left=Math.min(W-270,Math.max(0,e.clientX-r.left+12))+'px'; tip.style.top=(e.clientY-r.top+12)+'px';
+      tip.innerHTML=`<b>${esc(p[0])}</b><br>${esc(p[1])}, ${p[2]}${p[3]?` · ${p[3]} citations`:''}`; } else tip.style.opacity=0; });
+  cv.addEventListener('mouseleave',()=>{ hover=-1; tip.style.opacity=0; draw(); });
+  cv.addEventListener('click',()=>{ if(hover>=0){ const p=list[hover]; window.open(p.url||'https://scholar.google.com/scholar?q='+encodeURIComponent(p[0]),'_blank','noopener'); } });
+  window.drawDNA=()=>{ legend(); draw(); };
+  legend(); draw();
+  let t; addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(draw,150); });
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
 </script>
 </body>
 </html>

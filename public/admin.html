@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Visitor Dashboard — atul-sir</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F5F8;--surface:#fff;--ink:#142033;--muted:#5A6678;--line:#D8DEE7;--signal:#2348D6;--signal-soft:#E4EAFC;--pulse:#0F9D8A;--amber:#B97800;--display:'Bricolage Grotesque',system-ui,sans-serif;--body:'IBM Plex Sans',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0D1422;--surface:#141D2E;--ink:#E6ECF5;--muted:#97A3B7;--line:#26324B;--signal:#7D96FF;--signal-soft:#1D2950;--pulse:#35CDB6;--amber:#F2B33D}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--body)}
+.wrap{max-width:1240px;margin:0 auto;padding:24px 16px 60px}
+h1{font:800 1.9rem var(--display);letter-spacing:-.02em}
+h2{font:700 1.1rem var(--display);margin-bottom:12px}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:22px}
+.top p{color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+button,select,.btn{font:600 .9rem var(--body);padding:.6rem 1rem;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none}
+button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.login{max-width:420px;margin:12vh auto;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:32px}
+.login p{color:var(--muted);margin:.4rem 0 1.2rem}
+.login input{width:100%;padding:.8rem 1rem;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:400 1rem var(--body);margin-bottom:12px}
+.err{color:#C0392B;font-size:.9rem;min-height:1.2em;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.card b{display:block;font:800 1.7rem var(--display);letter-spacing:-.02em}
+.card span{color:var(--muted);font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;overflow:hidden}
+.span2{grid-column:span 2}.span3{grid-column:1/-1}
+.bars .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-size:.9rem;margin-bottom:8px}
+.bars .row i{grid-column:1/-1;height:6px;background:var(--line);border-radius:6px;overflow:hidden;display:block}
+.bars .row i u{display:block;height:100%;background:var(--signal);border-radius:6px}
+.bars .row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#daily{width:100%;height:auto}
+#daily rect{fill:var(--signal)} #daily text{fill:var(--muted);font:500 10px var(--body)}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th,td{text-align:left;padding:.55rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;position:sticky;top:0;background:var(--surface)}
+.scroll{max-height:460px;overflow:auto}
+.tag{font-size:.75rem;padding:.1rem .45rem;border-radius:999px;background:var(--signal-soft);color:var(--signal);white-space:nowrap}
+.note{color:var(--muted);font-size:.85rem;margin-top:8px}
+@media (max-width:980px){.cards{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.span2{grid-column:auto}}
+@media (max-width:520px){.cards{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="loginView" class="login">
+  <h1>Visitor dashboard</h1>
+  <p>Enter the admin key you set as <b>ADMIN_KEY</b> on Render.</p>
+  <form id="loginForm"><input id="key" type="password" placeholder="Admin key" autocomplete="current-password" required><button class="primary" style="width:100%">Open dashboard</button></form>
+  <div class="err" id="err"></div>
+</div>
+
+<div id="dash" class="wrap" hidden>
+  <div class="top">
+    <div><h1>Who visited your site</h1><p id="storageNote"></p></div>
+    <div class="actions">
+      <select id="days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last year</option></select>
+      <button id="refresh">Refresh</button>
+      <button id="csv">Download CSV</button>
+      <button id="scholarBtn">Update Scholar data now</button>
+      <button id="logout">Log out</button>
+    </div>
+  </div>
+  <div class="cards" id="cards"></div>
+  <div class="grid">
+    <div class="panel span2"><h2>Visits per day</h2><svg id="daily" viewBox="0 0 800 220"></svg></div>
+    <div class="panel"><h2>Countries</h2><div class="bars" id="countries"></div></div>
+    <div class="panel"><h2>Cities</h2><div class="bars" id="cities"></div></div>
+    <div class="panel"><h2>Came from</h2><div class="bars" id="referrers"></div></div>
+    <div class="panel"><h2>Devices &amp; browsers</h2><div class="bars" id="devices"></div><div class="bars" id="browsers" style="margin-top:14px"></div></div>
+    <div class="panel span3"><h2>Recent visits</h2><div class="scroll"><table id="visits"></table></div><p class="note">IP addresses are stored with the last part hidden. Location is approximate (city level).</p></div>
+    <div class="panel span3"><h2>Questions asked to the chatbot</h2><div class="scroll"><table id="chats"></table></div></div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const fmt=n=>Number(n||0).toLocaleString('en-IN');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let KEY=sessionStorage.getItem('adminKey')||'';
+async function api(path,opts={}){
+  const r=await fetch(path,{...opts,headers:{'x-admin-key':KEY,...(opts.headers||{})}});
+  if(r.status===401){ logout('That key is not correct.'); throw new Error('auth'); }
+  if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.error||('Error '+r.status)); }
+  return r;
+}
+function logout(msg){ KEY=''; sessionStorage.removeItem('adminKey'); $('#dash').hidden=true; $('#loginView').hidden=false; $('#err').textContent=msg||''; }
+function bars(el,rows){ const max=Math.max(1,...rows.map(r=>r[1])); el.innerHTML=rows.length?rows.map(([k,v])=>`<div class="row"><span title="${esc(k)}">${esc(k)}</span><b>${fmt(v)}</b><i><u style="width:${v/max*100}%"></u></i></div>`).join(''):'<p class="note">No data yet.</p>'; }
+function dur(s){ if(!s) return '—'; const m=Math.floor(s/60); return m?`${m}m ${s%60}s`:`${s}s`; }
+function daily(obj){
+  const e=Object.entries(obj), max=Math.max(4,...e.map(x=>x[1])), W=800,H=220,L=30,B=24,T=12,bw=(W-L)/e.length;
+  let s=''; [0,.5,1].forEach(f=>{ const y=T+(H-T-B)*(1-f); s+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+3}" text-anchor="end">${Math.round(max*f)}</text>`; });
+  e.forEach(([d,v],i)=>{ const h=(H-T-B)*v/max, x=L+i*bw+bw*.15; s+=`<rect x="${x}" y="${H-B-h}" width="${bw*.7}" height="${h}" rx="3"><title>${d}: ${v} visits</title></rect>`;
+    if(e.length<=31 ? i%Math.ceil(e.length/10)===0 : i%Math.ceil(e.length/8)===0) s+=`<text x="${x+bw*.35}" y="${H-6}" text-anchor="middle">${d.slice(5)}</text>`; });
+  $('#daily').innerHTML=s;
+}
+async function load(){
+  const days=$('#days').value;
+  const [sum,vis,ch]=await Promise.all([api('/api/admin/summary?days='+days).then(r=>r.json()),api('/api/admin/visits?limit=300').then(r=>r.json()),api('/api/admin/chats?limit=200').then(r=>r.json())]);
+  $('#loginView').hidden=true; $('#dash').hidden=false;
+  $('#storageNote').textContent = sum.storage==='mongodb' ? 'Saved permanently in MongoDB.' : 'Saved on the server disk — Render clears this on every redeploy. Add MONGODB_URI to keep it permanently.';
+  $('#cards').innerHTML=[[sum.total,'Total visits'],[sum.unique,'Unique visitors'],[sum.today,'Visits today'],[sum.online,'Online now (5 min)'],[dur(sum.period.avgSeconds),'Average time on site'],[sum.chats,'Chatbot questions']]
+    .map(([v,l])=>`<div class="card"><b>${typeof v==='number'?fmt(v):v}</b><span>${l}</span></div>`).join('');
+  daily(sum.daily); bars($('#countries'),sum.countries); bars($('#cities'),sum.cities); bars($('#referrers'),sum.referrers); bars($('#devices'),sum.devices); bars($('#browsers'),sum.browsers);
+  $('#visits').innerHTML='<tr><th>When (IST)</th><th>Where</th><th>Device</th><th>Came from</th><th>Time on site</th><th>Sections seen</th><th>IP</th></tr>'+vis.map(v=>`<tr>
+    <td>${new Date(v.ts).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} ${v.returning?'<span class="tag">returning</span>':''}</td>
+    <td>${esc([v.city,v.region,v.country].filter(Boolean).join(', ')||'Unknown')}<br><small style="color:var(--muted)">${esc(v.isp||'')}</small></td>
+    <td>${esc(v.device)} · ${esc(v.os)} · ${esc(v.browser)}<br><small style="color:var(--muted)">${esc(v.screen)} · ${esc(v.lang)}</small></td>
+    <td>${esc((()=>{try{return v.ref?new URL(v.ref).hostname:'Direct'}catch(e){return 'Direct'}})())}</td>
+    <td>${dur(v.duration)}${v.scrolled?`<br><small style="color:var(--muted)">scrolled ${v.scrolled}%</small>`:''}</td>
+    <td style="max-width:220px">${esc(v.sections||'—')}</td><td>${esc(v.ip)}</td></tr>`).join('');
+  $('#chats').innerHTML='<tr><th>When (IST)</th><th>Question</th><th>Answer given</th><th>Answered by</th></tr>'+(ch.length?ch.map(c=>`<tr><td style="white-space:nowrap">${new Date(c.ts).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(c.q)}</td><td style="color:var(--muted);max-width:420px">${esc(c.a)}</td><td><span class="tag">${c.source==='ai'?'AI':'Built-in'}</span></td></tr>`).join(''):'<tr><td colspan="4" class="note">No questions yet.</td></tr>');
+}
+$('#loginForm').onsubmit=async e=>{ e.preventDefault(); KEY=$('#key').value.trim(); $('#err').textContent='';
+  try{ await load(); sessionStorage.setItem('adminKey',KEY); }catch(err){ if(err.message!=='auth') $('#err').textContent=err.message; } };
+$('#refresh').onclick=()=>load().catch(()=>{}); $('#days').onchange=()=>load().catch(()=>{});
+$('#logout').onclick=()=>logout();
+$('#csv').onclick=async()=>{ const r=await api('/api/admin/export.csv'); const a=document.createElement('a'); a.href=URL.createObjectURL(await r.blob()); a.download='visitors.csv'; a.click(); };
+$('#scholarBtn').onclick=async()=>{ const b=$('#scholarBtn'); b.disabled=true; b.textContent='Updating…';
+  try{ const j=await api('/api/admin/refresh-scholar',{method:'POST'}).then(r=>r.json()); b.textContent=j.ok?`Updated from ${j.source}`:'Update failed — try later'; }catch(e){ b.textContent='Update failed'; }
+  setTimeout(()=>{ b.disabled=false; b.textContent='Update Scholar data now'; },4000); };
+if(KEY) load().catch(()=>{});
+setInterval(()=>{ if(!$('#dash').hidden) load().catch(()=>{}); },60000);
+</script>
+</body>
+</html>

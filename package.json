@@ -1,0 +1,9 @@
+{
+  "name": "atul-sir-website",
+  "version": "2.0.0",
+  "description": "Dr. Atul B. Kathole — academic website with visitor analytics, chatbot and auto-updating research metrics",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "express": "^4.21.2", "mongodb": "^6.12.0" }
+}

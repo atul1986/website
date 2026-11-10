@@ -1,0 +1,20 @@
+# Render Blueprint — lets Render set up this site automatically (Dashboard → New → Blueprint → pick this repo)
+services:
+  - type: web
+    name: atul-sir
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/stats
+    envVars:
+      - key: ADMIN_KEY          # password for /admin — Render asks you for it
+        sync: false
+      - key: MONGODB_URI        # free MongoDB Atlas connection string (keeps visitor data forever)
+        sync: false
+      - key: SERPAPI_KEY        # optional: exact Google Scholar numbers
+        sync: false
+      - key: ANTHROPIC_API_KEY  # optional: AI chatbot answers
+        sync: false
+      - key: IP_SALT
+        generateValue: true
